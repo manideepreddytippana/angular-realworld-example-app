@@ -1,5 +1,5 @@
 import { defineConfig } from '@playwright/test';
-import { baseConfig } from './e2e/playwright.base';
+import { baseConfig } from './realworld/specs/e2e/playwright.base';
 
 /**
  * Angular-specific Playwright configuration.
@@ -7,6 +7,7 @@ import { baseConfig } from './e2e/playwright.base';
  */
 export default defineConfig({
   ...baseConfig,
+  testDir: './realworld/specs/e2e',
 
   use: {
     ...baseConfig.use,
