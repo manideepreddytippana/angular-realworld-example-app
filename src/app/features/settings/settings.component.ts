@@ -27,7 +27,10 @@ export default class SettingsComponent implements OnInit {
     image: new FormControl('', { nonNullable: true }),
     username: new FormControl('', { nonNullable: true }),
     bio: new FormControl('', { nonNullable: true }),
-    email: new FormControl('', { nonNullable: true }),
+    email: new FormControl('', {
+      validators: [Validators.required, Validators.email],
+      nonNullable: true,
+    }),
     password: new FormControl('', {
       validators: [Validators.required],
       nonNullable: true,
@@ -59,6 +62,12 @@ export default class SettingsComponent implements OnInit {
 
   submitForm() {
     this.isSubmitting.set(true);
+
+    if (this.settingsForm.controls.email.invalid) {
+      this.settingsForm.controls.email.markAsTouched();
+      this.isSubmitting.set(false);
+      return;
+    }
 
     const payload = { ...this.settingsForm.value };
     if (!payload.password) {
