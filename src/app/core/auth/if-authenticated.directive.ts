@@ -14,25 +14,40 @@ export class IfAuthenticatedDirective<T> implements OnInit {
     private viewContainer: ViewContainerRef,
   ) {}
 
+  isAuthenticated = signal<boolean | null>(null);
   condition = signal(false);
   hasView = signal(false);
 
   ngOnInit() {
     this.userService.isAuthenticated.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((isAuthenticated: boolean) => {
-      const authRequired = isAuthenticated && this.condition();
-      const unauthRequired = !isAuthenticated && !this.condition();
-
-      if ((authRequired || unauthRequired) && !this.hasView()) {
-        this.viewContainer.createEmbeddedView(this.templateRef);
-        this.hasView.set(true);
-      } else if (this.hasView()) {
-        this.viewContainer.clear();
-        this.hasView.set(false);
-      }
+      this.isAuthenticated.set(isAuthenticated);
+      this.updateView();
     });
   }
 
   @Input() set ifAuthenticated(condition: boolean) {
     this.condition.set(condition);
+    this.updateView();
+  }
+
+  private updateView(): void {
+    const isAuthenticated = this.isAuthenticated();
+
+    if (isAuthenticated === null) {
+      return;
+    }
+
+    const shouldShow = (isAuthenticated && this.condition()) || (!isAuthenticated && !this.condition());
+
+    if (shouldShow && !this.hasView()) {
+      this.viewContainer.createEmbeddedView(this.templateRef);
+      this.hasView.set(true);
+      return;
+    }
+
+    if (!shouldShow && this.hasView()) {
+      this.viewContainer.clear();
+      this.hasView.set(false);
+    }
   }
 }
